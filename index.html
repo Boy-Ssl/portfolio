@@ -154,7 +154,7 @@ window.addEventListener('load',clearEntryScroll);
   }
   .mobile-menu.open{display:flex;}
   .mobile-menu a{
-    font-family:var(--display);font-size:28px;font-weight:700;padding:14px 18px;
+    font-family:var(--display);font-size:clamp(18px,4.8vw,22px);font-weight:700;padding:12px 16px;
     border-radius:12px;border:1px solid transparent;color:var(--text-2);
     transition:color .2s,background .2s,box-shadow .2s,border-color .2s;
   }
@@ -1008,10 +1008,16 @@ window.addEventListener('load',clearEntryScroll);
     padding:clamp(80px,10vw,120px) 0 48px;
     background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%);
     border-top:1px solid var(--line);
+    scroll-margin-top:calc(var(--sticky-top, 0px) + 20px);
   }
   footer .cta-block{text-align:center;margin-bottom:64px;}
   footer .cta-block .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
   footer .cta-block h2{font-size:clamp(48px,10vw,140px);margin-bottom:32px;}
+  @media(max-width:900px){
+    footer{padding-top:clamp(48px,8vw,72px);}
+    footer .cta-block{margin-bottom:40px;}
+    footer .cta-block h2{font-size:clamp(36px,9vw,56px);margin-bottom:24px;}
+  }
   footer .cta-block h2 a{
     color:var(--text);
     transition:color .2s;
@@ -1753,6 +1759,14 @@ window.addEventListener('load',clearEntryScroll);
     return stickyTop()+(bar?bar.offsetHeight:72)+8;
   }
 
+  function anchorGap(extra){
+    return stickyTop()+(window.innerWidth<=900?20:extra);
+  }
+
+  function maxScrollTop(){
+    return Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+  }
+
   function scrollToWgroup(id,behavior){
     syncAnchorVars();
     const group=document.getElementById(id);
@@ -1779,9 +1793,23 @@ window.addEventListener('load',clearEntryScroll);
       return;
     }
 
+    if(id==='contact'){
+      syncAnchorVars();
+      const footer=document.getElementById('contact');
+      const target=footer?.querySelector('.cta-block')||footer;
+      if(!target)return;
+      const gap=anchorGap(24);
+      const top=Math.min(
+        Math.max(0,target.getBoundingClientRect().top+window.scrollY-gap),
+        maxScrollTop()
+      );
+      window.scrollTo({top,behavior:behavior||(reducedMotion?'auto':'smooth')});
+      return;
+    }
+
     const el=document.getElementById(id);
     if(!el)return;
-    const top=el.getBoundingClientRect().top+window.scrollY-(topOffset+16);
+    const top=el.getBoundingClientRect().top+window.scrollY-anchorGap(16);
     window.scrollTo({top:Math.max(0,top),behavior:behavior||(reducedMotion?'auto':'smooth')});
   }
 
@@ -1816,11 +1844,21 @@ window.addEventListener('load',clearEntryScroll);
     if(!id||!document.getElementById(id))return;
     if(!sections.includes(id)&&!wgroupIds.includes(id))return;
     e.preventDefault();
-    scrollToAnchor(id);
-    history.pushState(null,'', '#'+id);
-    if(id==='works'){
-      setActive([...document.querySelectorAll('#catnav a')],'w-poster');
+    const fromMobile=anyLink.closest('#mobileMenu');
+    if(fromMobile){
+      menuBtn.classList.remove('open');
+      mobileMenu.classList.remove('open');
     }
+    const jump=()=>{
+      scrollToAnchor(id,fromMobile||window.innerWidth<=900?'auto':undefined);
+      history.pushState(null,'', '#'+id);
+      if(id==='works'){
+        setActive([...document.querySelectorAll('#catnav a')],'w-poster');
+      }
+    };
+    if(fromMobile)requestAnimationFrame(()=>requestAnimationFrame(jump));
+    else jump();
+    return;
   });
 
   window.addEventListener('hashchange',()=>{
@@ -1883,10 +1921,15 @@ window.addEventListener('load',clearEntryScroll);
 
   function scrollSpy(ids,links,triggerLine){
     let active=ids[0];
-    for(const id of ids){
-      const el=document.getElementById(id);
-      if(!el)continue;
-      if(el.getBoundingClientRect().top<=triggerLine)active=id;
+    const contact=document.getElementById('contact');
+    if(contact&&window.scrollY>=maxScrollTop()-12){
+      active='contact';
+    }else{
+      for(const id of ids){
+        const el=document.getElementById(id);
+        if(!el)continue;
+        if(el.getBoundingClientRect().top<=triggerLine)active=id;
+      }
     }
     setActive(links,active);
     return active;
