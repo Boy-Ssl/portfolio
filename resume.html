@@ -118,7 +118,6 @@
 <body>
 
 <div class="toolbar">
-  <button class="primary" type="button" onclick="window.print()">保存为 PDF / 打印</button>
   <a href="index.html">返回作品集</a>
 </div>
 
@@ -219,13 +218,5 @@
 
   <p class="foot-note">在线作品集见 index.html · 本简历与作品集页面信息同步 · 2026</p>
 </article>
-
-<script>
-  if(new URLSearchParams(location.search).get('print')==='1'){
-    window.addEventListener('load',function(){
-      setTimeout(function(){window.print();},600);
-    });
-  }
-</script>
 </body>
 </html>
