@@ -7,12 +7,15 @@
 try{history.scrollRestoration='manual';}catch(e){}
 function clearEntryScroll(){
   if(location.hash)history.replaceState(null,'',location.pathname+location.search);
+  var html=document.documentElement,body=document.body;
   window.scrollTo(0,0);
+  html.scrollTop=0;body.scrollTop=0;
 }
 clearEntryScroll();
 window.addEventListener('pageshow',function(e){
   if(e.persisted)clearEntryScroll();
 });
+window.addEventListener('load',clearEntryScroll);
 </script>
 <title>谭诗怡 平面设计师作品集</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1155,6 +1158,8 @@ window.addEventListener('pageshow',function(e){
     box-shadow:0 0 16px rgba(255,92,53,.45);
     animation:welcomeBar 2.8s var(--ease) forwards;
   }
+  html.welcome-lock,body.welcome-lock{overflow:hidden!important;height:100%;width:100%;}
+  body.welcome-lock{position:fixed;inset:0;top:0!important;left:0;right:0;}
   .welcome.leave{opacity:0;visibility:hidden;pointer-events:none;}
   .welcome.leave .welcome-inner{animation:welcomeOut .65s var(--ease) forwards;}
   @keyframes welcomeIn{
@@ -1602,10 +1607,32 @@ window.addEventListener('pageshow',function(e){
 <script>
 (function(){
   const resetFns=[];
-  function resetPortfolioState(){
+  function forceScrollTop(){
+    const html=document.documentElement;
+    const body=document.body;
+    const prevHtml=html.style.scrollBehavior;
+    const prevBody=body.style.scrollBehavior;
+    html.style.scrollBehavior='auto';
+    body.style.scrollBehavior='auto';
     window.scrollTo(0,0);
+    html.scrollTop=0;
+    body.scrollTop=0;
+    html.style.scrollBehavior=prevHtml;
+    body.style.scrollBehavior=prevBody;
+  }
+  function settleScrollTop(){
+    forceScrollTop();
+    requestAnimationFrame(()=>{
+      forceScrollTop();
+      requestAnimationFrame(forceScrollTop);
+    });
+    setTimeout(forceScrollTop,50);
+  }
+  function resetPortfolioState(){
+    forceScrollTop();
     if(location.hash)history.replaceState(null,'',location.pathname+location.search);
     resetFns.forEach(fn=>fn());
+    settleScrollTop();
   }
 
   const welcome=document.getElementById('welcome');
@@ -1660,23 +1687,15 @@ window.addEventListener('pageshow',function(e){
 
   function lockPageScroll(){
     savedScrollY=0;
-    window.scrollTo(0,0);
-    document.body.style.position='fixed';
-    document.body.style.top=`-${savedScrollY}px`;
-    document.body.style.left='0';
-    document.body.style.right='0';
-    document.body.style.width='100%';
+    forceScrollTop();
+    document.documentElement.classList.add('welcome-lock');
+    document.body.classList.add('welcome-lock');
   }
 
   function unlockPageScroll(){
-    document.body.style.position='';
-    document.body.style.top='';
-    document.body.style.left='';
-    document.body.style.right='';
-    document.body.style.width='';
-    document.body.style.overflow='';
-    document.documentElement.style.overflow='';
-    window.scrollTo(0,savedScrollY);
+    document.documentElement.classList.remove('welcome-lock');
+    document.body.classList.remove('welcome-lock');
+    forceScrollTop();
   }
 
   function closeWelcome(){
@@ -1689,6 +1708,7 @@ window.addEventListener('pageshow',function(e){
     welcome.setAttribute('aria-hidden','true');
     setTimeout(()=>welcome.remove(),700);
     resetPortfolioState();
+    settleScrollTop();
   }
 
   if(welcome) lockPageScroll();
@@ -1808,7 +1828,11 @@ window.addEventListener('pageshow',function(e){
     if(id)scrollToAnchor(id,'auto');
   });
 
-  welcomeEnter?.addEventListener('click',closeWelcome);
+  welcomeEnter?.addEventListener('click',e=>{
+    e.preventDefault();
+    welcomeEnter.blur();
+    closeWelcome();
+  });
   welcome?.addEventListener('click',e=>{if(e.target===welcome)closeWelcome();});
   welcome?.addEventListener('wheel',()=>closeWelcome(),{passive:true});
   document.addEventListener('keydown',e=>{
