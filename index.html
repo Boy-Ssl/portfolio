@@ -421,22 +421,26 @@ window.addEventListener('load',clearEntryScroll);
     box-shadow:0 6px 24px rgba(255,92,53,.5);transform:translateY(-2px) scale(1.04);
   }
   @media(max-width:900px){
-    .catnav-bar{margin-bottom:28px;}
+    .catnav-bar{margin-bottom:20px;}
     .catnav{
-      flex-wrap:nowrap;gap:8px;padding:10px 0;
+      flex-wrap:nowrap;gap:6px;padding:6px 0;
       overflow-x:auto;-webkit-overflow-scrolling:touch;
       scrollbar-width:none;-ms-overflow-style:none;
     }
     .catnav::-webkit-scrollbar{display:none;}
     .catnav a{
-      flex:0 0 auto;font-size:13px;padding:8px 14px;border-width:1px;
+      flex:0 0 auto;font-size:11px;font-weight:500;letter-spacing:0;
+      padding:5px 10px;border-width:1px;border-radius:8px;
       transform:none;
     }
-    .catnav a.active{transform:none;box-shadow:0 4px 16px rgba(255,92,53,.4);}
-    .wgroup-head{margin-bottom:24px;padding-bottom:16px;}
-    .wgroup-head h3{font-size:clamp(20px,5.2vw,28px);}
-    .wgroup-head .meta{font-size:14px;}
+    .catnav a.active{font-weight:600;transform:none;box-shadow:0 2px 10px rgba(255,92,53,.35);}
+    .catnav .tab-long{display:none;}
+    .catnav .tab-short{display:inline;}
+    .wgroup-head{margin-bottom:20px;padding-bottom:12px;}
+    .wgroup-head h3{font-size:clamp(18px,4.8vw,24px);}
+    .wgroup-head .meta{font-size:12px;}
   }
+  .catnav .tab-short{display:none;}
 
   .wgroup{margin-top:80px;scroll-margin-top:calc(var(--sticky-top, 0px) + var(--catnav-h, 72px) + 8px);}
   .wgroup:first-of-type{margin-top:0;}
@@ -1374,10 +1378,10 @@ window.addEventListener('load',clearEntryScroll);
   <div class="catnav-bar" id="catnavBar">
     <div class="wrap">
       <nav class="catnav" id="catnav">
-        <a href="#w-poster" class="active">版式 / 海报</a>
-        <a href="#w-ec">电商视觉</a>
-        <a href="#w-ui">UI 设计</a>
-        <a href="#w-3d">三维 / 创意</a>
+        <a href="#w-poster" class="active"><span class="tab-long">版式 / 海报</span><span class="tab-short">海报</span></a>
+        <a href="#w-ec"><span class="tab-long">电商视觉</span><span class="tab-short">电商</span></a>
+        <a href="#w-ui"><span class="tab-long">UI 设计</span><span class="tab-short">UI</span></a>
+        <a href="#w-3d"><span class="tab-long">三维 / 创意</span><span class="tab-short">三维</span></a>
       </nav>
     </div>
   </div>
